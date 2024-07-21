@@ -1,11 +1,34 @@
 {
   "name": "csv-for-you",
   "version": "1.0.0",
-  "description": "csv parser for all users. \u001b[1;5D\u001b[1;5D\u001b[1;5D\u001b[1;5D\u001b[1;5D\u001b[1;5D\u001b[1;5D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[3~\u001b[3~\u001b[C\u001b[1;5C\u001b[1;5C\u001b[1;5C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C. just install it to your nodeJS project and use it",
+  "description": "csv parser for all users. just install it to your nodeJS project and use it",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Michael scharff",
+  "keywords": [
+    "csv",
+    "csv-for-you",
+    "csv-file",
+    "csv-parser",
+    "parser",
+    "parse",
+    "csv-array",
+    "array",
+    "backend",
+    "nodejs",
+    "csv-to-json",
+    "json",
+    "converter",
+    "npm"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Minka1902/csv-for-you.git"
+  },
+  "author": {
+    "name": "Michael Scharff",
+    "email": "minka.scharff@gmail.com"
+  },
   "license": "ISC"
 }
