@@ -5,11 +5,6 @@
 /.vscode
 /.pnp
 .pnp.js
-error.log
-request.log
-/files
-/forTreeView
-/data
 
 # testing
 /coverage
