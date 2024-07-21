@@ -8,7 +8,7 @@ function hasLetters(variable) {
         }
     }
     return false;
-}
+};
 
 function hasNumbersOnly(variable, ignore = '') {
     if (variable !== '') {
@@ -21,7 +21,7 @@ function hasNumbersOnly(variable, ignore = '') {
         return true;
     }
     return false;
-}
+};
 
 function parseArrayFromString(coordString) {
     const parts = coordString.slice(1, -1).split(';');
@@ -30,7 +30,7 @@ function parseArrayFromString(coordString) {
     } else if (hasLetters(coordString)) {
         return parts.map(String);
     }
-}
+};
 
 module.exports.parseCsv = ({ filePath }) => {
     let remaining = '';
@@ -41,7 +41,6 @@ module.exports.parseCsv = ({ filePath }) => {
         try {
             fs.access(filePath, fs.constants.F_OK, (err) => {
                 if (err) {
-                    console.error(`File not found: ${filePath}`);
                     return resolve(`File not found - ${filePath}`);
                 }
 
@@ -103,7 +102,6 @@ module.exports.parseCsv = ({ filePath }) => {
                 });
             });
         } catch (err) {
-            console.error(`Caught exception: ${err.message}`);
             reject(err);
         }
     });
