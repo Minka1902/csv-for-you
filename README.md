@@ -1,5 +1,6 @@
 # csv-for-you
-This npm package is used by nodeJS developers for parsing CSV files into JSON objects.
+This npm package is used by nodeJS developers for parsing CSV files into JSON objects.</br>
+If you liked the package please star and follow me on GitHub
 
 ## Installation
 1) Run `npm install csv-for-you`.
@@ -27,3 +28,13 @@ This npm package is used by nodeJS developers for parsing CSV files into JSON ob
 3) Strings - Strings of any length.
 4) Arrays - Must start with `[` and end with `]` while the separator is not `,` but `;`.
 5) Values are separated by `,` and nothing else.
+
+## Future features
+1) Parsing Objects from the CSV file.
+2) Adding the options property to the package.
+3) Parsing CSV from JSON.
+
+## Issues and Requests
+For issues or requests go to https://github.com/Minka1902/csv-for-you/issues and add a new one.</br>
+In the title write Request/Issue and elaborate in the description.</br>
+I promise that i'll try my best to do everything.
