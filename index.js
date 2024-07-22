@@ -23,25 +23,40 @@ function hasNumbersOnly(variable, ignore = '') {
     return false;
 };
 
-function parseArrayFromString(coordString) {
-    const parts = coordString.slice(1, -1).split(';');
-    if (hasNumbersOnly(coordString, '[;]')) {
+function parseArrayFromString(coordString, arraySeparator) {
+    const parts = coordString.slice(1, -1).split(arraySeparator);
+    if (hasNumbersOnly(coordString, `[${arraySeparator}]`)) {
         return parts.map(Number);
     } else if (hasLetters(coordString)) {
         return parts.map(String);
     }
 };
 
-module.exports.parseCsv = ({ filePath }) => {
+function updateOptions(options, update) {
+    if (Object.keys(update).length > 0) {
+        const keys = Object.keys(update);
+        for (let key of keys) {
+            if (options[key] !== update[key]) {
+                options[key] = update[key];
+            }
+        }
+    }
+    return options;
+};
+
+module.exports.parseCsv = (filePath, tempOptions = { arraySeparator: ';', objectSeparator: '@', arrayOfArrays: true, returnArray: true }) => {
+    const options = updateOptions({ arraySeparator: ';', objectSeparator: '@', arrayOfArrays: true, returnArray: true }, tempOptions);
     let remaining = '';
-    let fileData = [];
+    let fileData;
+    if (options.returnArray) fileData = []
+    else fileData = {};
     let props;
 
     return new Promise((resolve, reject) => {
         try {
             fs.access(filePath, fs.constants.F_OK, (err) => {
                 if (err) {
-                    return resolve(`File not found - ${filePath}`);
+                    return resolve(`File not found.`);
                 }
 
                 const fileStream = fs.createReadStream(filePath, 'utf8');
@@ -52,26 +67,34 @@ module.exports.parseCsv = ({ filePath }) => {
                     let index = remaining.indexOf('\n', last);
 
                     while (index > -1) {
-                        let temp = {};
+                        let temp;
+                        if (options.arrayOfArrays) temp = []
+                        else temp = {};
                         if (last !== 0) {
                             const line = remaining.substring(last, index).replace('\r', '').split(',');
                             last = index + 1;
+
                             for (let i = 0; i < line.length; i++) {
                                 if (line[i][0] === '[' && line[i][line[i].length - 1] === ']') {
-                                    if (hasNumbersOnly(line[i], '[;]')) {
-                                        temp[props[i]] = parseArrayFromString(line[i]);
+                                    if (hasNumbersOnly(line[i], `[${options.arraySeparator}]`)) {
+                                        if (options.arrayOfArrays) temp.push(parseArrayFromString(line[i], options.arraySeparator))
+                                        else temp[props[i]] = parseArrayFromString(line[i], options.arraySeparator);
                                     } else if (hasLetters(line[i])) {
-                                        temp[props[i]] = parseArrayFromString(line[i]);
+                                        if (options.arrayOfArrays) temp.push(parseArrayFromString(line[i], options.arraySeparator))
+                                        else temp[props[i]] = parseArrayFromString(line[i], options.arraySeparator);
                                     }
                                 } else if (hasLetters(line[i])) {
-                                    temp[props[i]] = line[i];
+                                    if (options.arrayOfArrays) temp.push(line[i]);
+                                    else temp[props[i]] = line[i];
                                 } else if (hasNumbersOnly(line[i])) {
-                                    temp[props[i]] = parseFloat(line[i]);
+                                    if (options.arrayOfArrays) temp.push(parseFloat(line[i]))
+                                    else temp[props[i]] = parseFloat(line[i]);
                                 } else if (line[i] === '') {
-                                    temp[props[i]] = null;
+                                    if (options.arrayOfArrays) temp.push(null);
+                                    else temp[props[i]] = null;
                                 }
                             }
-                            fileData.push(temp);
+                            if (options.returnArray) fileData.push(temp);
                             index = remaining.indexOf('\n', last);
                         }
                     }
@@ -81,24 +104,34 @@ module.exports.parseCsv = ({ filePath }) => {
 
                 fileStream.on('end', () => {
                     if (remaining !== '') {
-                        let temp = {};
+                        let temp;
+                        if (options.arrayOfArrays) temp = []
+                        else temp = {};
                         remaining = remaining.split(',');
+
                         for (let i = 0; i < remaining.length; i++) {
-                            if (hasLetters(remaining[i])) {
-                                temp[props[i]] = remaining[i];
-                            } else if (remaining[i][0] === '[' && remaining[i][remaining[i].length - 1] === ']') {
-                                if (hasNumbersOnly(remaining[i], '[;]')) {
-                                    temp[props[i]] = parseArrayFromString(remaining[i]);
+                            if (remaining[i][0] === '[' && remaining[i][remaining[i].length - 1] === ']') {
+                                if (hasNumbersOnly(remaining[i], `[${options.arraySeparator}]`)) {
+                                    if (options.arrayOfArrays) temp.push(parseArrayFromString(remaining[i], options.arraySeparator))
+                                    else temp[props[i]] = parseArrayFromString(remaining[i], options.arraySeparator);
+                                } else if (hasLetters(remaining[i])) {
+                                    if (options.arrayOfArrays) temp.push(parseArrayFromString(remaining[i], options.arraySeparator))
+                                    else temp[props[i]] = parseArrayFromString(remaining[i], options.arraySeparator);
                                 }
+                            } else if (hasLetters(remaining[i])) {
+                                if (options.arrayOfArrays) temp.push(remaining[i]);
+                                else temp[props[i]] = remaining[i];
                             } else if (hasNumbersOnly(remaining[i])) {
-                                temp[props[i]] = parseFloat(remaining[i]);
+                                if (options.arrayOfArrays) temp.push(parseFloat(remaining[i]))
+                                else temp[props[i]] = parseFloat(remaining[i]);
                             } else if (remaining[i] === '') {
-                                temp[props[i]] = null;
+                                if (options.arrayOfArrays) temp.push(null);
+                                else temp[props[i]] = null;
                             }
                         }
-                        fileData.push(temp);
+                        if (options.returnArray) fileData.push(temp)
                     }
-                    resolve(fileData);
+                    resolve(fileData.length === 1 ? fileData[0] : fileData);
                 });
             });
         } catch (err) {

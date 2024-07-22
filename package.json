@@ -1,6 +1,6 @@
 {
   "name": "csv-for-you",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "csv parser for all users. just install it to your nodeJS project and use it",
   "main": "index.js",
   "scripts": {
