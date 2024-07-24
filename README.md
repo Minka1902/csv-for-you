@@ -13,8 +13,8 @@ If you liked the package please star and follow me on GitHub
     const { parseCsv } = require('csv-for-you');
 
     async function myFunction() {
-        const myCsvFileData = await parseCsv('C:\\path\\to\\my\\file.csv', { arraySeparator: ';', objectSeparator: '@', arrayOfArrays: true, returnArray: true } );
-        const otherCsvFileData = await parseCsv('C:\\path\\to\\other\\file.csv', { arraySeparator: '|', objectSeparator: ':', arrayOfArrays: false, returnArray: true } );
+        const myCsvFileData = await parseCsv('C:\\path\\to\\my\\file.csv', { arraySeparator: ';', objectSeparator: '@', arrayOfArrays: true, returnArray: true, returnAsString: [] } );
+        const otherCsvFileData = await parseCsv('C:\\path\\to\\other\\file.csv', { arraySeparator: '|', objectSeparator: ':', arrayOfArrays: false, returnArray: true, returnAsString: ['firstName', 'ID'] } );
         // Use the data however you'd like
     };
 ```
@@ -25,6 +25,7 @@ This object contains the options for the CSV parser:
 2) objectSeparator - NO-FUNCTION
 3) arrayOfArrays - Boolean that represents rather a line should be represented as an Array or Object
 4) returnArray - No-Function
+5) returnAsString - Array of property names that should be returned as a string (empty by default)
 
 ## Features
 1) Parses strings in CSV
@@ -42,10 +43,12 @@ This object contains the options for the CSV parser:
 
 ## Future features
 1) Parsing Objects from the CSV file
-2) Parsing CSV from JSON
-3) Error notifier - Lets you know what is the error
-4) Generating numeric data to CSV or JSON
-5) Generating lingual data to CSV or JSON
+2) Parsing TSV files
+3) Reading file structure starting from a folder
+4) Parsing CSV/TSV from JSON
+5) Error notifier - Lets you know what is the error
+6) Generating numeric data to CSV/TSV or JSON
+7) Generating lingual data to CSV/TSV or JSON
 
 ## Issues and Requests
 For issues or feature requests go to https://github.com/Minka1902/csv-for-you/issues and add a new one.</br>
