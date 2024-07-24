@@ -117,7 +117,7 @@ module.exports.parseCsv = (filePath, tempOptions = { arraySeparator: ';', object
                         const temp = processLine(remaining);
                         if (options.returnArray) fileData.push(temp)
                     }
-                    resolve(fileData.length === 1 ? fileData[0] : fileData);
+                    resolve(fileData);
                 });
             });
         } catch (err) {
