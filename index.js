@@ -3,10 +3,11 @@ const fs = require('fs');
 module.exports.parseCsv = (filePath, tempOptions = { arraySeparator: ';', objectSeparator: '@', arrayOfArrays: true, returnArray: true, returnAsString: [] }) => {
     const options = updateOptions({ arraySeparator: ';', objectSeparator: '@', arrayOfArrays: true, returnArray: true, returnAsString: [] }, tempOptions);
     let remaining = '';
+    let props;
+
     let fileData;
     if (options.returnArray) fileData = []
     else fileData = {};
-    let props;
 
     function hasLetters(variable) {
         const letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
