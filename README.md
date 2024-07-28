@@ -22,16 +22,17 @@ If you liked the package please star and follow me on GitHub
 ## Options
 This object contains the options for the CSV parser:
 1) arraySeparator - the Char that represents the separator between Array elements (`;` by default)
-2) objectSeparator - NO-FUNCTION
+2) objectSeparator - the Char that represents the separator between Object elements (`;` by default)
 3) arrayOfArrays - Boolean that represents rather a line should be represented as an Array or Object
 4) returnArray - No-Function
 5) returnAsString - Array of property names that should be returned as a string (empty by default)
+6) innerSeparator - the Char that represents the separator of the inner Array/Object (`@` by default)
 
 ## Features
 1) Parses strings in CSV
 2) Parses numbers in CSV
-3) Parses arrays of strings in CSV
-4) Parses arrays of numbers in CSV
+3) Parses arrays - numbers, strings, arrays and objects
+5) Parses objects - numbers, strings, arrays and objects
 
 ## CSV file format
 1) Properties - The first line of the file must be the properties of the objects
@@ -42,13 +43,12 @@ This object contains the options for the CSV parser:
 6) No need for whitespace after a coma - it might create problems
 
 ## Future features
-1) Parsing Objects from the CSV file
-2) Parsing TSV files
-3) Reading file structure starting from a folder
-4) Parsing CSV/TSV from JSON
-5) Error notifier - Lets you know what is the error
-6) Generating numeric data to CSV/TSV or JSON
-7) Generating lingual data to CSV/TSV or JSON
+1) Parsing TSV files
+2) Reading file structure starting from a folder
+3) Parsing CSV/TSV from JSON
+4) Error notifier - Lets you know what is the error
+5) Generating numeric data to CSV/TSV or JSON
+6) Generating lingual data to CSV/TSV or JSON
 
 ## Issues and Requests
 For issues or feature requests go to https://github.com/Minka1902/csv-for-you/issues and add a new one.</br>
