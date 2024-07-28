@@ -13,8 +13,8 @@ If you liked the package please star and follow me on GitHub
     const { parseCsv } = require('csv-for-you');
 
     async function myFunction() {
-        const myCsvFileData = await parseCsv('C:\\path\\to\\my\\file.csv', { arraySeparator: ';', objectSeparator: '@', arrayOfArrays: true, returnArray: true, returnAsString: [] } );
-        const otherCsvFileData = await parseCsv('C:\\path\\to\\other\\file.csv', { arraySeparator: '|', objectSeparator: ':', arrayOfArrays: false, returnArray: true, returnAsString: ['firstName', 'ID'] } );
+        const myCsvFileData = await parseCsv('C:\\path\\to\\my\\file.csv', { arraySeparator: ';', objectSeparator: ';', innerSeparator: '@', arrayOfArrays: true, returnArray: true, returnAsString: [] } );
+        const otherCsvFileData = await parseCsv('C:\\path\\to\\other\\file.csv', { arraySeparator: '|', objectSeparator: '^', innerSeparator: '&', arrayOfArrays: false, returnArray: true, returnAsString: ['firstName', 'ID'] } );
         // Use the data however you'd like
     };
 ```
@@ -39,8 +39,9 @@ This object contains the options for the CSV parser:
 2) Numbers - Any integer or float number
 3) Strings - Strings of any length
 4) Arrays - Must start with `[` and end with `]` while the separator is not `,`(arraySeparator in options to change)
-5) Values are separated by `,` and nothing else
-6) No need for whitespace after a coma - it might create problems
+5) Objects - Must start with `{` and end with `}` while the separator is not `,`(objectSeparator in options to change)
+6) Values are separated by `,` and nothing else
+7) No need for whitespace after a coma - it might create problems
 
 ## Future features
 1) Parsing TSV files
