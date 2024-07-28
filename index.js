@@ -1,29 +1,20 @@
 const fs = require('fs');
 
-module.exports.parseCsv = (filePath, tempOptions = { arraySeparator: ';', objectSeparator: '@', arrayOfArrays: true, returnArray: true, returnAsString: [] }) => {
-    const options = updateOptions({ arraySeparator: ';', objectSeparator: '@', arrayOfArrays: true, returnArray: true, returnAsString: [] }, tempOptions);
+module.exports.parseCsv = (filePath, tempOptions = { arraySeparator: ';', objectSeparator: ';', arrayOfArrays: true, returnArray: true, returnAsString: [] }) => {
+    const options = updateOptions({ arraySeparator: ';', objectSeparator: ';', innerSeparator: '@', arrayOfArrays: true, returnArray: true, returnAsString: [] }, tempOptions);
     let remaining = '';
-    let props;
-
     let fileData;
     if (options.returnArray) fileData = []
     else fileData = {};
+    let props;
 
-    function hasLetters(variable) {
-        const letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
-        for (let letter of letters) {
-            if (variable.indexOf(letter) !== -1) {
-                return true;
-            }
-        }
-        return false;
-    };
+    const hasLetters = (variable) => /[a-zA-Z]/.test(variable);
 
-    function hasNumbersOnly(variable, ignore = '') {
+    const hasNumbersOnly = (variable, ignore = '') => {
         if (variable !== '') {
-            const numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", " "];
+            const numbers = "1234567890. ";
             for (let char of variable) {
-                if (numbers.indexOf(char) === -1 && ignore.indexOf(char) === -1) {
+                if (!numbers.includes(char) && !ignore.includes(char)) {
                     return false;
                 }
             }
@@ -32,40 +23,58 @@ module.exports.parseCsv = (filePath, tempOptions = { arraySeparator: ';', object
         return false;
     };
 
-    function parseArrayFromString(coordString) {
-        const parts = coordString.slice(1, -1).split(options.arraySeparator);
-        if (hasNumbersOnly(coordString, `[${options.arraySeparator}]`)) {
-            return parts.map(Number);
-        } else if (hasLetters(coordString)) {
-            return parts.map(String);
+    function parseArrayFromString(str, separator = '') {
+        const parts = str.slice(1, -1).split(separator || options.arraySeparator);
+        let tempArr = [];
+        for (let part of parts) {
+            tempArr.push(processLine(part, true));
         }
+
+        return tempArr;
     };
 
-    const processLine = (line) => {
-        let temp;
-        if (options.arrayOfArrays) temp = []
-        else temp = {};
+    function parseObjectFromString(str) {
+        let tempObj = {};
+        const parts = str.slice(1, -1).split(options.objectSeparator);
+        for (let part of parts) {
+            const property = part.slice(0, part.indexOf(':'));
+            let value = part.slice(part.indexOf(':') + 1, str.length - 1);
+            tempObj[property] = processLine(value, true);
+        }
+        return tempObj;
+    };
+
+    const processLine = (line, isObject = false) => {
+        let temp = options.arrayOfArrays ? [] : {};
         for (let i = 0; i < line.length; i++) {
-            if (options.returnAsString.length > 0 && options.returnAsString.indexOf(props[i]) !== -1) {
-                if (options.arrayOfArrays) temp.push(line[i]);
-                else temp[props[i]] = line[i];
-            } else if (line[i][0] === '[' && line[i][line[i].length - 1] === ']') {
-                if (hasNumbersOnly(line[i], `[${options.arraySeparator}]`)) {
-                    if (options.arrayOfArrays) temp.push(parseArrayFromString(line[i]));
-                    else temp[props[i]] = parseArrayFromString(line[i]);
-                } else if (hasLetters(line[i])) {
-                    if (options.arrayOfArrays) temp.push(parseArrayFromString(line[i]));
-                    else temp[props[i]] = parseArrayFromString(line[i]);
+            if (!isObject) {
+                const prop = props[i];
+                const value = line[i];
+                if (options.returnAsString.includes(prop)) {
+                    temp[options.arrayOfArrays ? temp.length : prop] = value;
+                } else if (value.startsWith('{') && value.endsWith('}')) {
+                    temp[options.arrayOfArrays ? temp.length : prop] = parseObjectFromString(value);
+                } else if (value.startsWith('[') && value.endsWith(']')) {
+                    temp[options.arrayOfArrays ? temp.length : prop] = parseArrayFromString(value);
+                } else if (hasLetters(value)) {
+                    temp[options.arrayOfArrays ? temp.length : prop] = value;
+                } else if (hasNumbersOnly(value)) {
+                    temp[options.arrayOfArrays ? temp.length : prop] = Number(value);
+                } else if (value === '') {
+                    temp[options.arrayOfArrays ? temp.length : prop] = null;
                 }
-            } else if (hasLetters(line[i])) {
-                if (options.arrayOfArrays) temp.push(line[i]);
-                else temp[props[i]] = line[i];
-            } else if (hasNumbersOnly(line[i])) {
-                if (options.arrayOfArrays) temp.push(parseFloat(line[i]))
-                else temp[props[i]] = parseFloat(line[i]);
-            } else if (line[i] === '') {
-                if (options.arrayOfArrays) temp.push(null);
-                else temp[props[i]] = null;
+            } else {
+                if (line.startsWith('{') && line.endsWith('}')) {
+                    return parseObjectFromString(line);
+                } else if (line.startsWith('[') && line.endsWith(']')) {
+                    return parseArrayFromString(line, options.innerSeparator);
+                } else if (hasLetters(line)) {
+                    return line;
+                } else if (hasNumbersOnly(line)) {
+                    return Number(line);
+                } else if (!line) {
+                    return null;
+                }
             }
         }
         return temp;
@@ -84,44 +93,41 @@ module.exports.parseCsv = (filePath, tempOptions = { arraySeparator: ';', object
     };
 
     return new Promise((resolve, reject) => {
-        try {
-            fs.access(filePath, fs.constants.F_OK, (err) => {
-                if (err) {
-                    return resolve(`File not found.`);
+        fs.access(filePath, fs.constants.F_OK, (err) => {
+            if (err) return resolve('File not found.');
+
+            const fileStream = fs.createReadStream(filePath, 'utf8');
+            fileStream.on('data', (chunk) => {
+                remaining += chunk;
+                props = remaining.substring(0, remaining.indexOf('\n')).replace('\r', '').split(',');
+                let last = remaining.indexOf('\n') + 1;
+                let index = remaining.indexOf('\n', last);
+
+                while (index > -1) {
+                    const line = remaining.substring(last, index).replace('\r', '').split(',');
+                    last = index + 1;
+                    const temp = processLine(line);
+
+                    if (options.returnArray) fileData.push(temp);
+                    index = remaining.indexOf('\n', last);
                 }
 
-                const fileStream = fs.createReadStream(filePath, 'utf8');
-                fileStream.on('data', function (chunk) {
-                    remaining += chunk;
-                    props = remaining.substring(0, remaining.indexOf('\n')).replace('\r', '').split(',');
-                    let last = remaining.indexOf('\n') + 1;
-                    let index = remaining.indexOf('\n', last);
-
-                    while (index > -1) {
-                        if (last !== 0) {
-                            const line = remaining.substring(last, index).replace('\r', '').split(',');
-                            last = index + 1;
-                            const temp = processLine(line);
-
-                            if (options.returnArray) fileData.push(temp);
-                            index = remaining.indexOf('\n', last);
-                        }
-                    }
-
-                    remaining = remaining.substring(last);
-                });
-
-                fileStream.on('end', () => {
-                    if (remaining !== '') {
-                        remaining = remaining.split(',');
-                        const temp = processLine(remaining);
-                        if (options.returnArray) fileData.push(temp)
-                    }
-                    resolve(fileData);
-                });
+                remaining = remaining.substring(last);
             });
-        } catch (err) {
-            reject(err);
-        }
+
+            fileStream.on('end', () => {
+                if (remaining !== '') {
+                    remaining = remaining.split(',');
+                    const temp = processLine(remaining);
+                    if (options.returnArray) fileData.push(temp)
+                    else fileData.push(temp);
+                }
+                resolve(fileData);
+            });
+
+            fileStream.on('error', (err) => {
+                reject(err);
+            });
+        });
     });
 };
