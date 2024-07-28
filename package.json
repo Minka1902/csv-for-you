@@ -1,20 +1,19 @@
 {
   "name": "csv-for-you",
-  "version": "1.0.2",
-  "description": "csv parser for all users. just install it to your nodeJS project and use it",
+  "version": "1.0.3",
+  "description": "CSV parser. Supports all nodeJS versions.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "csv",
-    "csv-for-you",
-    "csv-file",
     "csv-parser",
     "parser",
     "parse",
     "csv-array",
     "array",
+    "object",
     "backend",
     "nodejs",
     "csv-to-json",
