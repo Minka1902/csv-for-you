@@ -1,12 +1,13 @@
 const fs = require('fs');
 
-module.exports.parseCsv = (filePath, tempOptions = { arraySeparator: ';', objectSeparator: ';', arrayOfArrays: true, returnArray: true, returnAsString: [] }) => {
-    const options = updateOptions({ arraySeparator: ';', objectSeparator: ';', innerSeparator: '@', arrayOfArrays: true, returnArray: true, returnAsString: [] }, tempOptions);
-    let remaining = '';
-    let fileData;
-    if (options.returnArray) fileData = []
+module.exports.parseCsv = (
+    filePath,
+    tempOptions = { arraySeparator: ';', objectSeparator: ';', lineAsArray: true, fileAsArray: true, returnAsString: [] },
+) => {
+    let remaining = '', fileData, props;
+    const options = updateObjects({ arraySeparator: ';', objectSeparator: ';', innerSeparator: '@', lineAsArray: true, fileAsArray: true, returnAsString: [] }, tempOptions);
+    if (options.fileAsArray) fileData = []
     else fileData = {};
-    let props;
 
     const hasLetters = (variable) => /[a-zA-Z]/.test(variable);
 
@@ -23,51 +24,112 @@ module.exports.parseCsv = (filePath, tempOptions = { arraySeparator: ';', object
         return false;
     };
 
-    function parseArrayFromString(str, separator = '') {
-        const parts = str.slice(1, -1).split(separator || options.arraySeparator);
-        let tempArr = [];
-        for (let part of parts) {
-            tempArr.push(processLine(part, true));
+    const parseObject = (str) => {
+        str = str.slice(1, -1);
+        let obj = {};
+        let value = '';
+        let stack = [];
+        let currentObj = obj;
+        let currentKey = '';
+        let isReadingKey = true;
+
+        for (let i = 0; i < str.length; i++) {
+            const char = str[i];
+
+            if (char === '{') {
+                stack.push(currentObj);
+                currentObj[currentKey.trim()] = {};
+                currentObj = currentObj[currentKey.trim()];
+                currentKey = '';
+                isReadingKey = true;
+            } else if (char === '}') {
+                if (currentKey) {
+                    currentObj[currentKey.trim()] = hasNumbersOnly(value) ? Number(value.trim()) : value.trim();
+                    currentKey = '';
+                    value = '';
+                }
+                currentObj = stack.pop();
+            } else if (char === ':') {
+                isReadingKey = false;
+            } else if (char === ';') {
+                if (currentKey) {
+                    currentObj[currentKey.trim()] = hasNumbersOnly(value) ? Number(value.trim()) : value.trim();
+                    currentKey = '';
+                    value = '';
+                }
+                isReadingKey = true;
+            } else {
+                if (isReadingKey) {
+                    currentKey += char;
+                } else {
+                    value += char;
+                }
+            }
         }
 
-        return tempArr;
+        if (currentKey) {
+            currentObj[currentKey.trim()] = hasNumbersOnly(value) ? Number(value.trim()) : value.trim();
+        }
+
+        return obj;
     };
 
-    function parseObjectFromString(str) {
-        let tempObj = {};
-        const parts = str.slice(1, -1).split(options.objectSeparator);
-        for (let part of parts) {
-            const property = part.slice(0, part.indexOf(':'));
-            let value = part.slice(part.indexOf(':') + 1, str.length - 1);
-            tempObj[property] = processLine(value, true);
+    const parseArray = (str) => {
+        str = str.slice(1, -1);
+
+        const result = [];
+        let temp = '';
+        let nestedLevel = 0;
+
+        for (let char of str) {
+            if (char === '[' || char === '{') {
+                nestedLevel++;
+                temp += char;
+            } else if (char === ']' || char === '}') {
+                nestedLevel--;
+                temp += char;
+            } else if (char === ';' && nestedLevel === 0) {
+                result.push(temp);
+                temp = '';
+            } else {
+                temp += char;
+            }
         }
-        return tempObj;
+
+        if (temp) result.push(temp);
+
+        return result.map((item) => {
+            if (item.startsWith('[') && item.endsWith(']')) return parseArray(item)
+            else if (item.startsWith('{') && item.endsWith('}')) return parseObject(item)
+            else if (hasNumbersOnly(item)) return Number(item)
+            else if (hasLetters(item)) return item
+        });
     };
 
     const processLine = (line, isObject = false) => {
-        let temp = options.arrayOfArrays ? [] : {};
+        let temp = options.lineAsArray ? [] : {};
         for (let i = 0; i < line.length; i++) {
             if (!isObject) {
                 const prop = props[i];
                 const value = line[i];
                 if (options.returnAsString.includes(prop)) {
-                    temp[options.arrayOfArrays ? temp.length : prop] = value;
+                    temp[options.lineAsArray ? temp.length : prop] = value;
                 } else if (value.startsWith('{') && value.endsWith('}')) {
-                    temp[options.arrayOfArrays ? temp.length : prop] = parseObjectFromString(value);
+                    temp[options.lineAsArray ? temp.length : prop] = parseObject(value);
                 } else if (value.startsWith('[') && value.endsWith(']')) {
-                    temp[options.arrayOfArrays ? temp.length : prop] = parseArrayFromString(value);
+                    temp[options.lineAsArray ? temp.length : prop] = parseArray(value);
                 } else if (hasLetters(value)) {
-                    temp[options.arrayOfArrays ? temp.length : prop] = value;
+                    temp[options.lineAsArray ? temp.length : prop] = value;
                 } else if (hasNumbersOnly(value)) {
-                    temp[options.arrayOfArrays ? temp.length : prop] = Number(value);
+                    temp[options.lineAsArray ? temp.length : prop] = Number(value);
                 } else if (value === '') {
-                    temp[options.arrayOfArrays ? temp.length : prop] = null;
+                    temp[options.lineAsArray ? temp.length : prop] = null;
                 }
             } else {
                 if (line.startsWith('{') && line.endsWith('}')) {
-                    return parseObjectFromString(line);
+                    return parseObject(line);
                 } else if (line.startsWith('[') && line.endsWith(']')) {
-                    return parseArrayFromString(line, options.innerSeparator);
+                    return parseArray(line, options.innerSeparator);
                 } else if (hasLetters(line)) {
                     return line;
                 } else if (hasNumbersOnly(line)) {
@@ -80,7 +142,7 @@ module.exports.parseCsv = (filePath, tempOptions = { arraySeparator: ';', object
         return temp;
     };
 
-    function updateOptions(options, update) {
+    function updateObjects(options, update) {
         if (Object.keys(update).length > 0) {
             const keys = Object.keys(update);
             for (let key of keys) {
@@ -106,9 +168,9 @@ module.exports.parseCsv = (filePath, tempOptions = { arraySeparator: ';', object
                 while (index > -1) {
                     const line = remaining.substring(last, index).replace('\r', '').split(',');
                     last = index + 1;
-                    const temp = processLine(line);
+                    let temp = processLine(line);
 
-                    if (options.returnArray) fileData.push(temp);
+                    if (options.fileAsArray) fileData.push(temp);
                     index = remaining.indexOf('\n', last);
                 }
 
@@ -119,7 +181,7 @@ module.exports.parseCsv = (filePath, tempOptions = { arraySeparator: ';', object
                 if (remaining !== '') {
                     remaining = remaining.split(',');
                     const temp = processLine(remaining);
-                    if (options.returnArray) fileData.push(temp)
+                    if (options.fileAsArray) fileData.push(temp)
                     else fileData.push(temp);
                 }
                 resolve(fileData);
