@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-module.exports.parseCsv = (
+const parseCsv = (
     filePath,
     tempOptions = { arraySeparator: ';', objectSeparator: ';', lineAsArray: true, fileAsArray: true, returnAsString: [] },
 ) => {
@@ -32,6 +32,15 @@ module.exports.parseCsv = (
         let currentObj = obj;
         let currentKey = '';
         let isReadingKey = true;
+        const findClosingBracket = (str, startIndex, openBracket, closeBracket) => {
+            let depth = 0;
+            for (let i = startIndex; i < str.length; i++) {
+                if (str[i] === openBracket) depth++;
+                if (str[i] === closeBracket) depth--;
+                if (depth === 0) return i;
+            }
+            return -1; // If no matching bracket is found
+        };
 
         for (let i = 0; i < str.length; i++) {
             const char = str[i];
@@ -49,6 +58,14 @@ module.exports.parseCsv = (
                     value = '';
                 }
                 currentObj = stack.pop();
+            } else if (char === '[') {
+                let arrayEndIndex = findClosingBracket(str, i, '[', ']');
+                let arrayString = str.slice(i, arrayEndIndex + 1);
+                currentObj[currentKey.trim()] = parseArray(arrayString);
+                i = arrayEndIndex;
+                currentKey = '';
+                value = '';
+                isReadingKey = true;
             } else if (char === ':') {
                 isReadingKey = false;
             } else if (char === ';') {
@@ -193,3 +210,5 @@ module.exports.parseCsv = (
         });
     });
 };
+
+module.exports = parseCsv;
