@@ -1,10 +1,12 @@
 const fs = require('fs');
 
-const parseCsv = (
+const parse = (
     filePath,
+    tempCallbacks = { lineCallback: '', fileCallback: '', arrayCallback: '', objectCallback: '', numberCallback: '', stringCallback: '' },
     tempOptions = { arraySeparator: ';', objectSeparator: ';', lineAsArray: true, fileAsArray: true, returnAsString: [] },
 ) => {
     let remaining = '', fileData, props;
+    const callbacks = updateObjects({ lineCallback: '', fileCallback: '', arrayCallback: '', objectCallback: '', numberCallback: '', stringCallback: '' }, tempCallbacks);
     const options = updateObjects({ arraySeparator: ';', objectSeparator: ';', innerSeparator: '@', lineAsArray: true, fileAsArray: true, returnAsString: [] }, tempOptions);
     if (options.fileAsArray) fileData = []
     else fileData = {};
@@ -138,7 +140,9 @@ const parseCsv = (
                 } else if (hasLetters(value)) {
                     temp[options.lineAsArray ? temp.length : prop] = value;
                 } else if (hasNumbersOnly(value)) {
-                    temp[options.lineAsArray ? temp.length : prop] = Number(value);
+                    if (typeof callbacks.numberCallback === 'function')
+                        temp[options.lineAsArray ? temp.length : prop] = callbacks.numberCallback(Number(value));
+                    else temp[options.lineAsArray ? temp.length : prop] = Number(value);
                 } else if (value === '') {
                     temp[options.lineAsArray ? temp.length : prop] = null;
                 }
@@ -211,4 +215,60 @@ const parseCsv = (
     });
 };
 
-module.exports = parseCsv;
+const addRow = (
+    filePath,
+    dataObject,
+    tempOptions = { lineNumber: 0 },
+) => {
+    const options = updateObjects({ lineNumber: 0 }, tempOptions)
+
+    const objectToCSVRow = (data, props) => {
+        const values = Object.values(data);
+        return values.map(value => `${value}`).join(',') + '\n';
+    };
+
+    function updateObjects(options, update) {
+        if (Object.keys(update).length > 0) {
+            const keys = Object.keys(update);
+            for (let key of keys) {
+                if (options[key] !== update[key]) {
+                    options[key] = update[key];
+                }
+            }
+        }
+        return options;
+    };
+
+    return fs.readFile(filePath, 'utf8', (err, fileData) => {
+        if (err) {
+            console.error('Error reading file:', err);
+            return;
+        }
+
+        const lines = fileData.split('\n');
+        const newRow = objectToCSVRow(dataObject, lines[0].split(','));
+        if (options.lineNumber !== 0) {
+            if (options.lineNumber >= 0 && options.lineNumber < lines.length) {
+                lines.splice(options.lineNumber, 0, newRow.trim());
+            } else {
+                lines.push(newRow.trim());
+            }
+
+            const updatedFileData = lines.join('\n');
+            fs.writeFile(filePath, updatedFileData, (err) => {
+                if (err) {
+                    return 'Error writing to file:', err;
+                }
+            });
+        } else {
+            const csvRow = objectToCSVRow(dataObject);
+            return fs.appendFile(filePath, csvRow, (err) => {
+                if (err) {
+                    return 'Error appending to CSV file:', err;
+                }
+            });
+        }
+    });
+};
+
+module.exports = { parse, addRow };
