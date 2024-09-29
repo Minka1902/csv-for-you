@@ -14,6 +14,7 @@
     "csv-array",
     "array",
     "object",
+    "csv-object",
     "backend",
     "nodejs",
     "csv-to-json",
