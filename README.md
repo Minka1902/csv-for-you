@@ -10,7 +10,7 @@ If you liked the package please star and follow me on GitHub
 1) In your entry point, import parseCsv from the package: `const parseCsv = require('csv-for-you');`
 2) Define your function as follows:
 ```jsx
-    const parseCsv = require('csv-for-you');
+    const csv = require('csv-for-you');
     const defaultOptions = {
         arraySeparator: ';',
         objectSeparator: ';',
@@ -27,16 +27,20 @@ If you liked the package please star and follow me on GitHub
     };
 
     async function myFunction() {
-        const myCsvFileData = await parseCsv('C:\\path\\to\\my\\file.csv', defaultOptions );
-        const otherCsvFileData = await parseCsv('C:\\path\\to\\other\\file.csv', options2 );
+        const myCsvFileData = await csv.parse('C:\\path\\to\\my\\file.csv', defaultOptions );
+        const otherCsvFileData = await csv.parse('C:\\path\\to\\other\\file.csv', options2 );
         // Use the data however you'd like
     };
 
     const myOtherFunction = async () => {
-        const myCsvFileData = await parseCsv('C:\\path\\to\\my\\file.csv', defaultOptions );
-        const otherCsvFileData = await parseCsv('C:\\path\\to\\other\\file.csv', options2 );
+        const myCsvFileData = await csv.parse('C:\\path\\to\\my\\file.csv', defaultOptions );
+        const otherCsvFileData = await csv.parse('C:\\path\\to\\other\\file.csv', options2 );
         // Use the data however you'd like
     };
+
+    csv.addRow('C:\\path\\to\\my\\file.csv', { name: "john smith" } );
+    csv.addRow('C:\\path\\to\\other\\file.csv', { name: "john smith" }, { lineNumber: 777 } );
+
 ```
 
 ## Options
@@ -51,7 +55,8 @@ This object contains the options for the CSV parser:
 1) Parses strings in CSV
 2) Parses numbers in CSV
 3) Parses arrays - numbers, strings, arrays and objects
-5) Parses objects - numbers, strings, arrays and objects
+4) Parses objects - numbers, strings, arrays and objects
+5) Add data with the `addRow` function
 
 ## CSV file format
 1) Properties - The first line of the file must be the properties of the objects
