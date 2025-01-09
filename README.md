@@ -3,8 +3,8 @@ This npm package is used by nodeJS developers for parsing CSV files into JSON ob
 Recently added the callback feature to this package, you can pass a callback function in your code and see it implemented.
 
 ## Installation
-1) Run `npm install csv-for-you`.
-2) Fork the git repository `https://github.com/Minka1902/csv-for-you.git`, and place it in your project`s root.
+1) Run `npm install csv-for-you`
+2) Fork the git repository `https://github.com/Minka1902/csv-for-you.git`
 
 ## Usage
 1) In your entry point, import csv from the package: `const csv = require('csv-for-you');`
@@ -16,14 +16,16 @@ Recently added the callback feature to this package, you can pass a callback fun
         objectSeparator: ';',
         lineAsArray: true,
         fileAsArray: true,
-        returnAsString: []
+        returnAsString: [],
+        inCallbacks: true,
     };
     const options2 = {
         arraySeparator: '|',
         objectSeparator: '^',
         lineAsArray: false,
         fileAsArray: true,
-        returnAsString: ['name', 'ID']
+        returnAsString: ['name', 'ID'],
+        inCallbacks: true,
     };
 
     async function myFunction() {
@@ -40,6 +42,8 @@ Recently added the callback feature to this package, you can pass a callback fun
 
     csv.addRow('C:\\path\\to\\my\\file.csv', { name: "john smith" } );
     csv.addRow('C:\\path\\to\\other\\file.csv', { name: "john smith" }, { lineNumber: 777 } );
+    csv.deleteRow('C:\\path\\to\\my\\file.csv');
+    csv.deleteRow('C:\\path\\to\\other\\file.csv', { rowNumber: 777, rowToDelete: 1 } );
 
 ```
 
@@ -58,7 +62,8 @@ This object contains the options for the CSV parser:
 3) Parses arrays - numbers, strings, arrays and objects
 4) Parses objects - numbers, strings, arrays and objects
 5) Add data with the `addRow` function
-6) callbacks - you can pass a callback function for each line and type of value:</br>
+6) Delete data with the `deleteRow` function
+7) callbacks - you can pass a callback function for each line and type of value:</br>
 &ensp;a) number</br>
 &ensp;b) string</br>
 &ensp;c) array</br>
@@ -68,10 +73,9 @@ This object contains the options for the CSV parser:
 1) Properties - The first line of the file must be the properties of the objects
 2) Numbers - Any integer or float number
 3) Strings - Strings of any length
-4) Arrays - Must start with `[` and end with `]` while the separator is not `,`(arraySeparator in the options object to change)
-5) Objects - Must start with `{` and end with `}` while the separator is not `,`(objectSeparator in the options object to change)
-6) Values are separated by `,` and nothing else!
-7) No need for whitespace after a coma - it might create problems
+4) Arrays - Must start with `[` and end with `]` while the separator is not `,`(`arraySeparator` in the options object to change)
+5) Objects - Must start with `{` and end with `}` while the separator is not `,`(`objectSeparator` in the options object to change)
+6) Values are separated by `,`
 
 ## Future features
 1) Parsing text to JSON
