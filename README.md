@@ -42,8 +42,8 @@ Recently added the callback feature to this package, you can pass a callback fun
 
     csv.addRow('C:\\path\\to\\my\\file.csv', { name: "john smith" } );
     csv.addRow('C:\\path\\to\\other\\file.csv', { name: "john smith" }, { lineNumber: 777 } );
-    csv.deleteRow('C:\\path\\to\\my\\file.csv');
-    csv.deleteRow('C:\\path\\to\\other\\file.csv', { rowNumber: 777, rowToDelete: 1 } );
+    csv.deleteRow('C:\\path\\to\\my\\file.csv',{ rowNumber: 777 } );
+    csv.deleteRow('C:\\path\\to\\other\\file.csv', { rowNumber: 777, rowsToDelete: 1 } );
 
 ```
 
