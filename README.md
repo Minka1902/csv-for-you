@@ -7,54 +7,50 @@ Recently added the callback feature to this package, you can pass a callback fun
 2) Fork the git repository `https://github.com/Minka1902/csv-for-you.git`
 
 ## Usage
-1) In your entry point, import csv from the package: `const csv = require('csv-for-you');`
-2) Use your function as follows:
 ```jsx
     const csv = require('csv-for-you');
-    const defaultOptions = {
-        arraySeparator: ';',
-        objectSeparator: ';',
-        lineAsArray: true,
-        fileAsArray: true,
-        returnAsString: [],
-        inCallbacks: true,
+    const parseOptions = {
+        arraySeparator: '|', // not required, default value is ';'
+        objectSeparator: '^', // not required, default value is ';'
+        lineAsArray: false, // not required, default value is 'true'
+        fileAsArray: true, // not required, default value is 'true'
+        returnAsString: ['name', 'ID'], // not required, default value is an empty array
+        innerCallbacks: true, // not required, default value is 'true
     };
-    const options2 = {
-        arraySeparator: '|',
-        objectSeparator: '^',
-        lineAsArray: false,
-        fileAsArray: true,
-        returnAsString: ['name', 'ID'],
-        inCallbacks: true,
+
+    const addOptions = {
+        lineNumber: 0 // not required, default value is 0 (deletes first line)
+    };
+
+    const deleteOptions = {
+        rowNumber: 5, // required! default value is -1
+        rowsToDelete: 3 // not required, default value is 1
+    };
+
+    const editOptions = {
+        data: { name: "john smith", age: 77 }, // required! must be an object
+        lineNumber: 3 // required! must be an integer and bigger than 1
     };
 
     async function myFunction() {
-        const myCsvFileData = await csv.parse('C:\\path\\to\\my\\file.csv', defaultOptions, { lineCallback: () => console.log("This is a callback for each line."), objectCallback: () => console.log("This is a callback for each OBJECT") } );
-        const otherCsvFileData = await csv.parse('C:\\path\\to\\other\\file.csv', options2 );
+        const myCsvFileData = await csv.parse('C:\\path\\to\\my\\file.csv', parseOptions, { lineCallback: yourLineCallback, objectCallback: yourObjectCallback } );
         // Use the data however you'd like
     };
 
-    const myOtherFunction = async () => {
-        const myCsvFileData = await csv.parse('C:\\path\\to\\my\\file.csv', defaultOptions );
-        const otherCsvFileData = await csv.parse('C:\\path\\to\\other\\file.csv', options2 );
-        // Use the data however you'd like
-    };
-
-    csv.addRow('C:\\path\\to\\my\\file.csv', { name: "john smith" } );
-    csv.addRow('C:\\path\\to\\other\\file.csv', { name: "john smith" }, { lineNumber: 777 } );
-    csv.deleteRow('C:\\path\\to\\my\\file.csv',{ rowNumber: 777 } );
-    csv.deleteRow('C:\\path\\to\\other\\file.csv', { rowNumber: 777, rowsToDelete: 1 } );
+    csv.addRow('C:\\path\\to\\my\\file.csv', { name: "john smith" }, addOptions );
+    csv.editRow('C:\\path\\to\\my\\file.csv', editOptions );
+    csv.deleteRow('C:\\path\\to\\other\\file.csv', deleteOptions);
 
 ```
 
-## Options
-This object contains the options for the CSV parser:
-1) arraySeparator - the Char that represents the separator between Array elements (`;` by default)
-2) objectSeparator - the Char that represents the separator between Object elements (`;` by default)
-3) lineAsArray - Boolean that represents rather a line should be represented as an Array or Object (`true` by default)
-4) fileAsArray - Boolean that represents rather the file should be represented as an Array or Object (`true` by default)
-5) returnAsString - Array of property names that should be returned as a string (empty by default)
-6) inCallbacks - Boolean that represents rather value callbacks should be implemented if there is a callback for the line/file (`true` by default)
+## The parse options object
+This object contains the parse function options.
+1) arraySeparator - the Char that represents the separator between Array elements
+2) objectSeparator - the Char that represents the separator between Object elements
+3) lineAsArray - Boolean that represents rather a line should be represented as an Array or Object
+4) fileAsArray - Boolean that represents rather the file should be represented as an Array or Object
+5) returnAsString - Array of property names that should be returned as a string
+6) innerCallbacks - Boolean that represents rather value callbacks should be implemented if there is a callback for the line/file
 
 ## Features
 1) Parses strings in CSV
@@ -63,11 +59,8 @@ This object contains the options for the CSV parser:
 4) Parses objects - numbers, strings, arrays and objects
 5) Add data with the `addRow` function
 6) Delete data with the `deleteRow` function
-7) callbacks - you can pass a callback function for each line and type of value:</br>
-&ensp;a) number</br>
-&ensp;b) string</br>
-&ensp;c) array</br>
-&ensp;d) object
+7) Edit line with the `editRow` function
+8) callbacks - you can pass a custom callback function for each line and type of value
 
 ## CSV file format
 1) Properties - The first line of the file must be the properties of the objects
