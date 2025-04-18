@@ -61,6 +61,7 @@ This object contains the parse function options.
 6) Delete data with the `deleteRow` function
 7) Edit line with the `editRow` function
 8) callbacks - you can pass a custom callback function for each line and type of value
+9) getHeaders function - returns an array of the file headers
 
 ## CSV file format
 1) Properties - The first line of the file must be the properties of the objects
@@ -78,6 +79,7 @@ This object contains the parse function options.
 5) Error notifier - Lets you know what is the problem
 6) Generating numeric data to CSV or JSON
 7) Generating lingual data to CSV or JSON
+8) Reading a specific value for example only the name property, or an array of properties
 
 ## Issues and Requests
 For issues or feature requests go to https://github.com/Minka1902/csv-for-you/issues and add a new one.</br>
