@@ -1,10 +1,23 @@
 {
   "name": "csv-for-you",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "CSV parser. Supports all nodeJS versions.",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
+    "build": "tsc",
+    "prepare": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "csvfy": "bin/csvfy.js"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "typescript": "^5.6.3"
   },
   "keywords": [
     "csv",

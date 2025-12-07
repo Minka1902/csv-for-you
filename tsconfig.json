@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "CommonJS",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./",
+    "strict": false
+  },
+  "include": ["index.ts"],
+  "exclude": ["node_modules", "dist", "bin", "test"]
+}
